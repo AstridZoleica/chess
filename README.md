@@ -1,5 +1,5 @@
 ### Diagram of Code and What I'd Like to Add
-!idkwhatgoeshere(https://github.com/AstridZoleica/chess/blob/master/Chess%20Code%20Diagram-2.png)
+![idkwhatgoeshere](https://github.com/AstridZoleica/chess/blob/master/Chess%20Code%20Diagram-2.png)
 
 ### Explanation of the MOVEIDs
 Scheme for encoding moves.  
