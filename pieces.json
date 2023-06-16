@@ -1,0 +1,70 @@
+{
+    "pieces": [
+        {
+            "name": "pawn",
+            "id": "Pp",
+            "moves": [
+                "0110000m0000lM0r000000sr000000t00000er000000M0!",
+                "0210000m00f0lM0r000000sr000000t00000er000000M0!",
+                "111200c00000lM0r000000sr000000t00000er000000M0!",
+                "111000c00000lM0r000000sr000000t00000erfP1001M0210000m00f0lM0r000000sr000000t00000er000000M0!!",
+                "110200c00000lM0r000000sr000000t00000erfP1010M0210000m00f0lM0r000000sr000000t00000er000000M0!!"
+            ],
+            "promotable": true,
+            "promotes_to": "NBRQ"
+        },
+        {
+            "name": "rook",
+            "id": "Rr",
+            "moves": [
+                "011030cm0n00lM0r000000sr000000t00000er000000M0!",
+                "101030cm0n00lM0r000000sr000000t00000er000000M0!"
+            ],
+            "promotable": false,
+            "promotes_to": "0"
+        },
+        {
+            "name": "knight",
+            "id": "Nn",
+            "moves": [
+                "211234cmj000lM0r000000sr000000t00000er000000M0!",
+                "121234cmj000lM0r000000sr000000t00000er000000M0!"
+            ],
+            "promotable": false,
+            "promotes_to": "0"
+        },
+        {
+            "name": "bishop",
+            "id": "Bb",
+            "moves": [
+                "111234cm0n00lM0r000000sr000000t00000er000000M0!"
+            ],
+            "promotable": false,
+            "promotes_to": "0"
+        },
+        {
+            "name": "queen",
+            "id": "Qq",
+            "moves": [
+                "011030cm0n00lM0r000000sr000000t00000er000000M0!",
+                "101030cm0n00lM0r000000sr000000t00000er000000M0!",
+                "111234cm0n00lM0r000000sr000000t00000er000000M0!"
+            ],
+            "promotable": false,
+            "promotes_to": "0"
+        },
+        {
+            "name": "king",
+            "id": "Kk",
+            "moves": [
+                "011030cm0000lM0r000000sr000000t00000er000000M0!",
+                "101030cm0000lM0r000000sr000000t00000er000000M0!",
+                "111234cm0000lM0r000000sr000000t00000er000000M0!",
+                "2010000m0000lM0r000000srFR0003t0020per000000M0!",
+                "2000300m0000lM0r000000srFR0040t0003per000000M0!"
+            ],
+            "promotable": false,
+            "promotes_to": "0"
+        }
+    ]
+}
