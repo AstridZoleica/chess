@@ -13,39 +13,28 @@ use std::convert::TryInto;
 // HashMap for easily accessing named things with ids, including the starting positions.
 use std::collections::HashMap;
 
+// Declare some modules.
+// use configuration;
 
 fn main() {
     println!("Hello, world!");
+    // Set global variables, namely the game_counter and the hashmaps.
     let mut game_counter:u64 = 0;
+    // Load in the pieces from the configuration file.
     let piece_list: PieceList = load_piece_list().unwrap();
-    let mut piece_symbol_map: HashMap<char, &PieceType> = HashMap::new();
-    for i in &piece_list.pieces {
-        piece_symbol_map.insert(i.white_id, i);
-        piece_symbol_map.insert(i.black_id, i);
-    }
-    // dbg!(&piece_symbol_map); Had some issues before, this was for debugging.
+    // Create the hashmap which pairs PieceTypes and their symbols for recognition.
+    let mut piece_symbol_map: HashMap<char, &PieceType> = piece_list.map_piecetypes_to_symbols();
+    // dbg!(&piece_symbol_map); // Had some issues before, this was for debugging.
     // piece_list_console_diagnostics(piece_list);
-    let position_list: PositionListIntermediateRepresentation = PositionListIntermediateRepresentation {
-        positions: parse_startingPositions_json().unwrap()
-    };
-    let mut position_name_map: HashMap<String, String> = HashMap::new();
-    for i in &position_list.positions {
-        position_name_map.insert(i.name.clone(), i.fen.clone());
-        // println!("{}", i.name.clone());
-        // println!("{}", i.fen.clone());
-    }
+    // Load in the positions provided in the configuration file. Must be done after loading in the PieceTypes since the FEN has symbols that correspond to pieces.
+    let position_list: PositionListIntermediateRepresentation = PositionListIntermediateRepresentation::new();
+    // Create the hashmap which pairs the names of positions with their FENs.
+    let mut position_name_map: HashMap<String, String> = position_list.map_positions_to_names();
+    // Initialize a game.
     let game: Game = Game::new(game_counter, String::from("standard"), piece_symbol_map, position_name_map);
-    let mut piece_id_map: HashMap<u8, &Piece> = HashMap::new();
-    for i in &game.list_of_pieces_ingame {
-        piece_id_map.insert(i.id, &i);
-    }
-    for i in &game.list_of_pieces_ingame {
-        // println!("{}", i.id);
-        // println!("{}", i.player);
-        // println!("{}", i.piece_type.black_id);
-    }
-    // Refactor this lol.
-    // print_piece_ID_map(game);
+    // Fill a HashMap with the piece IDs and references to the pieces.
+    let mut piece_id_map: HashMap<u8, &Piece> = game.map_pieces_to_ids();
+    print_piece_ID_map(game);
 }
 
 fn print_piece_ID_map(game: Game<'_>) {
@@ -98,37 +87,12 @@ fn piece_list_console_diagnostics(piece_list: PieceList) {
     }
 }
 
-// Load in the piece list based on the appropriate json file.
-fn load_piece_list() -> Result<PieceList> {
-    let mut output_piece_list: PieceList = PieceList {
-        pieces: Vec::new()
-    };
-    match parse_pieces_json() {
-        Err(why) => panic!("Failed to parse pieces.json because: {}", why),
-        Ok(piece_intermediate_representation_vector) => {
-            for piece_intermediate_representation in piece_intermediate_representation_vector {
-                let temp: Vec<char> = piece_intermediate_representation.id.chars().collect();
-                let piece = PieceType {
-                    name: piece_intermediate_representation.name,
-                    white_id: temp[0],
-                    black_id: temp[1],
-                    moveset: parse_moveset(piece_intermediate_representation.moves).unwrap(),
-                    promotable: piece_intermediate_representation.promotable,
-                    promotes_to: piece_intermediate_representation.promotes_to
-                };
-                output_piece_list.pieces.push(piece);
-            }
-        },
-    }
-    Ok(output_piece_list)
-}
-
-
 const BOARDSIZE: u8 = 8;
 
 struct Game<'a> {
     id: u64,
     active_color: char,
+    check: bool,
     position: Vec<u8>,
     list_of_pieces_ingame: Vec<Piece<'a>>,
     list_of_moves: Vec<(u8, String)>
@@ -177,11 +141,25 @@ impl<'a> Game<'a> {
         let mut game: Game = Game {
             id: game_id,
             active_color: 'w',
+            check: false,
             position: position_vector,
             list_of_pieces_ingame: temp_pieces,
             list_of_moves: Vec::new(),
         };
         game
+    }
+
+    pub fn map_pieces_to_ids(&self) -> HashMap<u8, &Piece> {
+        let mut output: HashMap<u8, &Piece> = HashMap::new();
+        for i in &self.list_of_pieces_ingame {
+            output.insert(i.id, &i);
+        }
+        // for i in &game.list_of_pieces_ingame {
+            // println!("{}", i.id);
+            // println!("{}", i.player);
+            // println!("{}", i.piece_type.black_id);
+        // }
+        output
     }
 }
 
@@ -200,6 +178,17 @@ struct Piece<'a>{
 #[derive(Debug)]
 struct PieceList {
     pieces: Vec<PieceType>
+}
+
+impl PieceList {
+    pub fn map_piecetypes_to_symbols(&self) -> HashMap <char, &PieceType> {
+        let mut output: HashMap<char, &PieceType> = HashMap::new();
+        for i in &self.pieces {
+            output.insert(i.white_id, i);
+            output.insert(i.black_id, i);
+        }
+        output
+    }
 }
 
 //"Piece Type". Stores data about a piece, distinct from the actual pieces on a board which are a different data structure.
@@ -618,11 +607,54 @@ fn parse_moveset(moveslist: Vec<String>) -> Result<Vec<Move>> {
     Ok(output)
 }
 
+// Load in the piece list based on the appropriate json file.
+fn load_piece_list() -> Result<PieceList> {
+    let mut output_piece_list: PieceList = PieceList {
+        pieces: Vec::new()
+    };
+    match parse_pieces_json() {
+        Err(why) => panic!("Failed to parse pieces.json because: {}", why),
+        Ok(piece_intermediate_representation_vector) => {
+            for piece_intermediate_representation in piece_intermediate_representation_vector {
+                let temp: Vec<char> = piece_intermediate_representation.id.chars().collect();
+                let piece = PieceType {
+                    name: piece_intermediate_representation.name,
+                    white_id: temp[0],
+                    black_id: temp[1],
+                    moveset: parse_moveset(piece_intermediate_representation.moves).unwrap(),
+                    promotable: piece_intermediate_representation.promotable,
+                    promotes_to: piece_intermediate_representation.promotes_to
+                };
+                output_piece_list.pieces.push(piece);
+            }
+        },
+    }
+    Ok(output_piece_list)
+}
+
 // ###### HANDLING POSITIONS ######
 //Intermediate Position List, again for handling serde's output.
 #[derive(Deserialize, Debug)]
 struct PositionListIntermediateRepresentation {
     positions: Vec<PositionIntermediateRepresentation>
+}
+
+impl PositionListIntermediateRepresentation {
+    fn new() -> PositionListIntermediateRepresentation {
+        PositionListIntermediateRepresentation {
+            positions: parse_startingPositions_json().unwrap()
+        }
+    }
+
+    fn map_positions_to_names(&self) -> HashMap<String, String> {
+        let mut output: HashMap<String, String> = HashMap::new();
+        for i in &self.positions {
+            output.insert(i.name.clone(), i.fen.clone());
+            // println!("{}", i.name.clone());
+            // println!("{}", i.fen.clone());
+        }
+        output
+    }
 }
 
 //Position Intermediate Representation. This is what serde plugs its values into.
