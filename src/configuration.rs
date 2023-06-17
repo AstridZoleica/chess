@@ -546,3 +546,74 @@ fn parse_starting_positions_json() -> Result<Vec<PositionIntermediateRepresentat
     }
     Ok(output)
 }
+
+#[cfg(test)]
+mod tests {
+
+    use crate::configuration::*;
+
+    #[test]
+    fn confirm_pieces_load_correctly() {
+        fn test_parse_pieces_json() -> Result<Vec<PieceIntermediateRepresentation>> {
+            // Create a path to the desired file
+            let path = Path::new("testfiles/standardPieces.json");
+            let display = path.display();
+        
+            // Open the path in read-only mode, returns `io::Result<File>`
+            let mut file = match File::open(&path) {
+                Err(why) => panic!("Couldn't open {}: {}", display, why),
+                Ok(file) => file,
+            };
+        
+            // Read the file contents into a string, returns `io::Result<usize>`
+            let mut s = String::new();
+            match file.read_to_string(&mut s) {
+                Err(why) => panic!("couldn't read {}: {}", display, why),
+                // Uncomment this to check what the file contains.
+                Ok(_) => (), //print!("{} contains:\n{}", display, s),
+            }
+            //Convert that String into a str.
+            s = s.to_owned();
+            let s_slice: &str = &s[..];
+        
+            //Make a PiecesListIntermediate out of the string using serde's json parsing.
+            let pieces_list: PiecesListIntermediate = serde_json::from_str::<PiecesListIntermediate>(s_slice).unwrap();
+            // Iniialize output vector and fill it.
+            let mut output: Vec<PieceIntermediateRepresentation> = Vec::new();
+            for i in pieces_list.pieces {
+                output.push(i);
+            }
+            Ok(output)
+        }
+        fn test_load_piece_list() -> Result<PieceList> {
+            let mut output_piece_list: PieceList = PieceList {
+                pieces: Vec::new()
+            };
+            match test_parse_pieces_json() {
+                Err(why) => panic!("Failed to parse pieces.json because: {}", why),
+                Ok(piece_intermediate_representation_vector) => {
+                    for piece_intermediate_representation in piece_intermediate_representation_vector {
+                        let temp: Vec<char> = piece_intermediate_representation.id.chars().collect();
+                        let piece = PieceType {
+                            name: piece_intermediate_representation.name,
+                            white_id: temp[0],
+                            black_id: temp[1],
+                            moveset: parse_moveset(piece_intermediate_representation.moves).unwrap(),
+                            promotable: piece_intermediate_representation.promotable,
+                            promotes_to: piece_intermediate_representation.promotes_to
+                        };
+                        output_piece_list.pieces.push(piece);
+                    }
+                },
+            }
+            Ok(output_piece_list)
+        }
+        let test_piece_list: PieceList = test_load_piece_list().unwrap();
+        let mut output:String = String::new();
+        for i in test_piece_list.pieces {
+            output.push(i.white_id);
+            output.push(i.black_id);
+        }
+        assert_eq!(output, "PpRrNnBbQqKk");
+    }
+}
