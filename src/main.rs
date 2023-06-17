@@ -8,7 +8,7 @@ use crate::configuration::*;
 fn main() {
     println!("Hello, world!");
     // Set global variables, namely the game_counter and the hashmaps.
-    let mut game_counter:u64 = 0;
+    let mut game_counter: u64 = 0;
     // Load in the pieces from the configuration file.
     let piece_list: PieceList = load_piece_list().unwrap();
     // Create the hashmap which pairs PieceTypes and their symbols for recognition.
@@ -16,28 +16,24 @@ fn main() {
     // dbg!(&piece_symbol_map); // Had some issues before, this was for debugging.
     // piece_list_console_diagnostics(piece_list);
     // Load in the positions provided in the configuration file. Must be done after loading in the PieceTypes since the FEN has symbols that correspond to pieces.
-    let position_list: PositionListIntermediateRepresentation = PositionListIntermediateRepresentation::new();
+    let position_list: PositionListIntermediateRepresentation =
+        PositionListIntermediateRepresentation::new();
     // Create the hashmap which pairs the names of positions with their FENs.
     let mut position_name_map: HashMap<String, String> = position_list.map_positions_to_names();
     // Initialize a game.
-    let game: Game = Game::new(game_counter, String::from("standard"), piece_symbol_map, position_name_map);
+    let game: Game = Game::new(
+        game_counter,
+        String::from("standard"),
+        piece_symbol_map,
+        position_name_map,
+    );
     // Fill a HashMap with the piece IDs and references to the pieces.
     let mut piece_id_map: HashMap<u8, &Piece> = game.map_pieces_to_ids();
-    print_piece_id_map(game);
+    game.print_piece_id_map();
+    game.print_piece_symbol_map();
 }
 
 // Debugging Functions
-fn print_piece_id_map(game: Game<'_>) {
-    println!("Piece ID Map");
-    println!("{}  {}  {}  {}  {}  {}  {}  {}", game.position[0], game.position[1], game.position[2], game.position[3], game.position[4], game.position[5], game.position[6], game.position[7]);
-    println!("{}  {}  {}  {}  {}  {}  {}  {}", game.position[8], game.position[9], game.position[10], game.position[11], game.position[12], game.position[13], game.position[14], game.position[15]);
-    println!("{}  {}  {}  {}  {}  {}  {}  {}", game.position[16], game.position[17], game.position[18], game.position[19], game.position[20], game.position[21], game.position[22], game.position[23]);
-    println!("{}  {}  {}  {}  {}  {}  {}  {}", game.position[24], game.position[25], game.position[26], game.position[27], game.position[27], game.position[28], game.position[29], game.position[30]);
-    println!("{}  {}  {}  {}  {}  {}  {}  {}", game.position[32], game.position[33], game.position[34], game.position[35], game.position[36], game.position[37], game.position[38], game.position[39]);
-    println!("{}  {}  {}  {}  {}  {}  {}  {}", game.position[40], game.position[41], game.position[42], game.position[43], game.position[44], game.position[45], game.position[46], game.position[47]);
-    println!("{}  {}  {}  {}  {}  {}  {}  {}", game.position[48], game.position[49], game.position[50], game.position[51], game.position[52], game.position[53], game.position[54], game.position[55]);
-    println!("{}  {}  {}  {}  {}  {}  {}  {}", game.position[56], game.position[57], game.position[58], game.position[59], game.position[60], game.position[61], game.position[62], game.position[63]);
-}
 
 fn piece_list_console_diagnostics(piece_list: PieceList) {
     for i in piece_list.pieces {
@@ -55,19 +51,50 @@ fn piece_list_console_diagnostics(piece_list: PieceList) {
             }
             println!("Conditional based on position? {}", j.requires_target_piece);
             if j.requires_target_piece {
-                println!("Target piece player {} and ID {}", j.target_piece_player, j.target_piece_id);
+                println!(
+                    "Target piece player {} and ID {}",
+                    j.target_piece_player, j.target_piece_id
+                );
             }
             println!("Castles? {}", j.castles);
             if j.castles {
-                println!("Castling target piece player {} and ID {}", j.castle_target_piece_player, j.castle_target_piece_id);
-                println!("Castling target relative position {} {} {} {}", j.castle_target_piece_relative_location.0, j.castle_target_piece_relative_location.1, j.castle_target_piece_relative_location.2, j.castle_target_piece_relative_location.3);
-                println!("Castling target movement {} {} {} {}", j.castle_target_piece_movement.0, j.castle_target_piece_movement.1, j.castle_target_piece_movement.2, j.castle_target_piece_movement.3);
+                println!(
+                    "Castling target piece player {} and ID {}",
+                    j.castle_target_piece_player, j.castle_target_piece_id
+                );
+                println!(
+                    "Castling target relative position {} {} {} {}",
+                    j.castle_target_piece_relative_location.0,
+                    j.castle_target_piece_relative_location.1,
+                    j.castle_target_piece_relative_location.2,
+                    j.castle_target_piece_relative_location.3
+                );
+                println!(
+                    "Castling target movement {} {} {} {}",
+                    j.castle_target_piece_movement.0,
+                    j.castle_target_piece_movement.1,
+                    j.castle_target_piece_movement.2,
+                    j.castle_target_piece_movement.3
+                );
             }
             println!("En passant? {}", j.enpassant);
             if j.enpassant {
-                println!("EnPassant target piece player {} and ID {}", j.enpassant_target_piece_player.unwrap(), j.enpassant_target_piece_id.unwrap());
-                println!("EnPassant target piece relative location {} {} {} {}", j.enpassant_target_piece_relative_location.unwrap().0, j.enpassant_target_piece_relative_location.unwrap().1, j.enpassant_target_piece_relative_location.unwrap().2, j.enpassant_target_piece_relative_location.unwrap().3);
-                println!("EnPassant target piece previous move: {}", j.enpassant_target_piece_previous_move.unwrap());
+                println!(
+                    "EnPassant target piece player {} and ID {}",
+                    j.enpassant_target_piece_player.unwrap(),
+                    j.enpassant_target_piece_id.unwrap()
+                );
+                println!(
+                    "EnPassant target piece relative location {} {} {} {}",
+                    j.enpassant_target_piece_relative_location.unwrap().0,
+                    j.enpassant_target_piece_relative_location.unwrap().1,
+                    j.enpassant_target_piece_relative_location.unwrap().2,
+                    j.enpassant_target_piece_relative_location.unwrap().3
+                );
+                println!(
+                    "EnPassant target piece previous move: {}",
+                    j.enpassant_target_piece_previous_move.unwrap()
+                );
             }
             println!("--");
         }
@@ -86,19 +113,28 @@ struct Game<'a> {
     check: bool,
     position: Vec<u8>,
     list_of_pieces_ingame: Vec<Piece<'a>>,
-    list_of_moves: Vec<(u8, String)>
+    list_of_moves: Vec<(u8, String)>,
 }
 
 impl<'a> Game<'a> {
-    pub fn new(game_id: u64, starting_position_key: String, piece_hashmap: HashMap<char, &'a PieceType>, position_hashmap: HashMap<String, String>) -> Game<'a> {
-        let mut piece_counter:u8 = 1;
+    pub fn new(
+        game_id: u64,
+        starting_position_key: String,
+        piece_hashmap: HashMap<char, &'a PieceType>,
+        position_hashmap: HashMap<String, String>,
+    ) -> Game<'a> {
+        let mut piece_counter: u8 = 1;
         // Check that all the IDs are found in the piece hashmap, otherwise give up lol
         // Hold the pieces and collect them.
         let mut temp_pieces: Vec<Piece> = Vec::new();
         // Position vector as a list of 64 numbers.
         let mut position_vector: Vec<u8> = Vec::new();
         // Fill in empty spaces in FEN notation.
-        for i in position_hashmap.get(&starting_position_key).unwrap().chars() {
+        for i in position_hashmap
+            .get(&starting_position_key)
+            .unwrap()
+            .chars()
+        {
             // println!("{}", i.clone()); This helps to debug.
             match i {
                 '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
@@ -107,21 +143,18 @@ impl<'a> Game<'a> {
                         position_vector.push(0);
                         c += 1;
                     }
-                },
+                }
                 // Ignore slashes in FEN notation.
-                '/' => {},
+                '/' => {}
                 // Place pieces into the position vector as their IDs, place them into the piece collection, and increment the piece counter.
                 a => {
                     let p: Piece = Piece {
                         id: piece_counter,
-                        player: if a.is_uppercase() {
-                            'w'
-                        } else {
-                            'b'
-                        },
+                        player: if a.is_uppercase() { 'w' } else { 'b' },
+                        symbol: a,
                         piece_type: piece_hashmap.get(&a).unwrap(),
                         has_castled: false,
-                        list_of_moves: Vec::new()
+                        list_of_moves: Vec::new(),
                     };
                     piece_counter += 1;
                     position_vector.push(p.id);
@@ -146,10 +179,203 @@ impl<'a> Game<'a> {
             output.insert(i.id, &i);
         }
         // for i in &game.list_of_pieces_ingame {
-            // println!("{}", i.id);
-            // println!("{}", i.player);
-            // println!("{}", i.piece_type.black_id);
+        // println!("{}", i.id);
+        // println!("{}", i.player);
+        // println!("{}", i.piece_type.black_id);
         // }
         output
+    }
+
+    pub fn print_piece_id_map(&self) {
+        println!("Piece ID Map");
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            self.position[0],
+            self.position[1],
+            self.position[2],
+            self.position[3],
+            self.position[4],
+            self.position[5],
+            self.position[6],
+            self.position[7]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            self.position[8],
+            self.position[9],
+            self.position[10],
+            self.position[11],
+            self.position[12],
+            self.position[13],
+            self.position[14],
+            self.position[15]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            self.position[16],
+            self.position[17],
+            self.position[18],
+            self.position[19],
+            self.position[20],
+            self.position[21],
+            self.position[22],
+            self.position[23]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            self.position[24],
+            self.position[25],
+            self.position[26],
+            self.position[27],
+            self.position[27],
+            self.position[28],
+            self.position[29],
+            self.position[30]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            self.position[32],
+            self.position[33],
+            self.position[34],
+            self.position[35],
+            self.position[36],
+            self.position[37],
+            self.position[38],
+            self.position[39]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            self.position[40],
+            self.position[41],
+            self.position[42],
+            self.position[43],
+            self.position[44],
+            self.position[45],
+            self.position[46],
+            self.position[47]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            self.position[48],
+            self.position[49],
+            self.position[50],
+            self.position[51],
+            self.position[52],
+            self.position[53],
+            self.position[54],
+            self.position[55]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            self.position[56],
+            self.position[57],
+            self.position[58],
+            self.position[59],
+            self.position[60],
+            self.position[61],
+            self.position[62],
+            self.position[63]
+        );
+    }
+
+    pub fn print_piece_symbol_map(&self) {
+        let temp = self.map_pieces_to_ids();
+        println!("Current Board");
+        let mut output: Vec<char> = Vec::new();
+        for i in &self.position {
+            if *i != 0 {
+                output.push(temp.get(i).unwrap().symbol);
+            } else {
+                output.push('0');
+            }
+        }
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            output[0],
+            output[1],
+            output[2],
+            output[3],
+            output[4],
+            output[5],
+            output[6],
+            output[7]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            output[8],
+            output[9],
+            output[10],
+            output[11],
+            output[12],
+            output[13],
+            output[14],
+            output[15]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            output[16],
+            output[17],
+            output[18],
+            output[19],
+            output[20],
+            output[21],
+            output[22],
+            output[23]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            output[24],
+            output[25],
+            output[26],
+            output[27],
+            output[27],
+            output[28],
+            output[29],
+            output[30]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            output[32],
+            output[33],
+            output[34],
+            output[35],
+            output[36],
+            output[37],
+            output[38],
+            output[39]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            output[40],
+            output[41],
+            output[42],
+            output[43],
+            output[44],
+            output[45],
+            output[46],
+            output[47]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            output[48],
+            output[49],
+            output[50],
+            output[51],
+            output[52],
+            output[53],
+            output[54],
+            output[55]
+        );
+        println!(
+            "{}  {}  {}  {}  {}  {}  {}  {}",
+            output[56],
+            output[57],
+            output[58],
+            output[59],
+            output[60],
+            output[61],
+            output[62],
+            output[63]
+        );
     }
 }
