@@ -1,0 +1,12 @@
+{
+    "positions": [
+        {
+            "name": "standard",
+            "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+        },
+        {
+            "name": "ssehc",
+            "fen": "pppppppp/rnbqkbnr/8/8/8/8/RNBQKBNR/PPPPPPPP"
+        }
+    ]
+}

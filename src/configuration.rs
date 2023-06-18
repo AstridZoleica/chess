@@ -16,6 +16,7 @@ use std::collections::HashMap;
 // ###### HANDLING PIECES ######
 
 //An actual piece on the board.
+#[derive(Debug)]
 pub struct Piece<'a>{
     pub id: u8,
     pub player: char,
@@ -553,39 +554,40 @@ mod tests {
 
     use crate::configuration::*;
 
+    fn test_parse_pieces_json() -> Result<Vec<PieceIntermediateRepresentation>> {
+        // Create a path to the desired file
+        let path = Path::new("testfiles/standardPieces.json");
+        let display = path.display();
+    
+        // Open the path in read-only mode, returns `io::Result<File>`
+        let mut file = match File::open(&path) {
+            Err(why) => panic!("Couldn't open {}: {}", display, why),
+            Ok(file) => file,
+        };
+    
+        // Read the file contents into a string, returns `io::Result<usize>`
+        let mut s = String::new();
+        match file.read_to_string(&mut s) {
+            Err(why) => panic!("couldn't read {}: {}", display, why),
+            // Uncomment this to check what the file contains.
+            Ok(_) => (), //print!("{} contains:\n{}", display, s),
+        }
+        //Convert that String into a str.
+        s = s.to_owned();
+        let s_slice: &str = &s[..];
+    
+        //Make a PiecesListIntermediate out of the string using serde's json parsing.
+        let pieces_list: PiecesListIntermediate = serde_json::from_str::<PiecesListIntermediate>(s_slice).unwrap();
+        // Iniialize output vector and fill it.
+        let mut output: Vec<PieceIntermediateRepresentation> = Vec::new();
+        for i in pieces_list.pieces {
+            output.push(i);
+        }
+        Ok(output)
+    }
+
     #[test]
     fn confirm_pieces_load_correctly() {
-        fn test_parse_pieces_json() -> Result<Vec<PieceIntermediateRepresentation>> {
-            // Create a path to the desired file
-            let path = Path::new("testfiles/standardPieces.json");
-            let display = path.display();
-        
-            // Open the path in read-only mode, returns `io::Result<File>`
-            let mut file = match File::open(&path) {
-                Err(why) => panic!("Couldn't open {}: {}", display, why),
-                Ok(file) => file,
-            };
-        
-            // Read the file contents into a string, returns `io::Result<usize>`
-            let mut s = String::new();
-            match file.read_to_string(&mut s) {
-                Err(why) => panic!("couldn't read {}: {}", display, why),
-                // Uncomment this to check what the file contains.
-                Ok(_) => (), //print!("{} contains:\n{}", display, s),
-            }
-            //Convert that String into a str.
-            s = s.to_owned();
-            let s_slice: &str = &s[..];
-        
-            //Make a PiecesListIntermediate out of the string using serde's json parsing.
-            let pieces_list: PiecesListIntermediate = serde_json::from_str::<PiecesListIntermediate>(s_slice).unwrap();
-            // Iniialize output vector and fill it.
-            let mut output: Vec<PieceIntermediateRepresentation> = Vec::new();
-            for i in pieces_list.pieces {
-                output.push(i);
-            }
-            Ok(output)
-        }
         fn test_load_piece_list() -> Result<PieceList> {
             let mut output_piece_list: PieceList = PieceList {
                 pieces: Vec::new()
