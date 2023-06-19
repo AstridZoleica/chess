@@ -21,6 +21,7 @@ pub struct Piece<'a>{
     pub id: u8,
     pub player: char,
     pub symbol: char,
+    pub position: u8,
     pub piece_type: &'a PieceType,
     pub has_castled: bool,
     pub list_of_moves: Vec<String>

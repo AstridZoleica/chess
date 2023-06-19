@@ -46,6 +46,7 @@ impl<'a> Game<'a> {
                 a => {
                     let p: Piece = Piece {
                         id: piece_counter,
+                        position: piece_counter - 1,
                         player: if a.is_uppercase() { 'w' } else { 'b' },
                         symbol: a,
                         piece_type: piece_hashmap.get(&a).unwrap(),
@@ -273,15 +274,87 @@ impl<'a> Game<'a> {
     pub fn scan_available_moves(&self, id_map: &HashMap<u8, &Piece>) -> Vec<(u8, u8)> {
         let mut output: Vec<(u8, u8)> = Vec::new();
         // Iterate over all pieces in the game.
-        // Verify piece is correct color
-        // Search position vector for its location.
+        for i in &self.list_of_pieces_ingame {
+            // Verify piece is correct color
+            if &i.player == &self.active_color {
+                // Alternative but annoying way of accessing piece location.
+                // Search position vector for its location.
+                // let current_location: u8 = self.position.clone().into_iter().position(|n: u8| n == i.id).unwrap().try_into().unwrap();
+
+                // For each relevant piece, iterate over all of the moves.
+                for j in &i.piece_type.moveset {
+
+                }
+                // Create the read_move method() for the moves.
+            }
+        }
+        
         // For each piece, iterate over each move.
         // Examine the move, and calculate bit maps based on it.
         output
     }
 
+    //Just read the moveid into a bitmap ignoring checks
+    pub fn read_moveid_into_bitmap_ignoring_checks(&self, current_location: u8, move_pointer: Move) -> Vec<Vec<u8>> {
+        let mut string_wrapper: Vec<Vec<u8>> = Vec::new();
+        let mut output:Vec<u8> = Vec::new();
+
+        fn go_through_the_motions(bitmap: String) -> String {
+            let mut output: String = String::new();
+
+            // Verify that a capture can occur.
+
+            output
+        }
+
+        if move_pointer.reflections.0 {
+            //Create bitmap to translation!
+            let mut temp:Vec<u8> = Vec::new();
+            let mut counter: u8 = 0;
+            // Fill 0s before.
+            while counter < {current_location + move_pointer.translation.0 + 8 * move_pointer.translation.1} {
+                temp.push(0);
+                counter += 1;
+            }
+            // 1 on the actual index.
+            temp.push(1);
+            counter += 1;
+            // Fill 0s after.
+            while counter < 64 {
+                temp.push(0);
+                counter += 1;
+            }
+        }
+        string_wrapper
+    }
+
+    pub fn enemy_attack_bitmap(&self) -> String {
+        let mut output:String = String::new();
+        for i in &self.list_of_pieces_ingame {
+            if &i.player != &self.active_color {
+                
+            }
+        }
+        output
+    }
+
     // GENERATE BITMAPS
 
+    pub fn convert_bitmap_to_string(bitmap: &Vec<u8>) -> String {
+        let mut output: String = String::new();
+        for i in bitmap {
+            if *i == 1 {
+                output.push('1');
+            } else if *i == 0 {
+                output.push('0');
+            } else {
+                //Maybe throw a strange and really unlikely error here?
+            }
+        }
+        output
+    }
+
+    // CONVERT THIS TO USE Vec<u8>
     pub fn generate_white_piece_bitmap(&self, id_map: &HashMap<u8, &Piece>) -> String {
         let mut output: String = String::new();
         for i in &self.position {
@@ -296,6 +369,7 @@ impl<'a> Game<'a> {
         output
     }
 
+    // CONVERT THIS TO USE Vec<u8>
     pub fn generate_black_piece_bitmap(&self, id_map: &HashMap<u8, &Piece>) -> String {
         let mut output: String = String::new();
         for i in &self.position {
@@ -321,6 +395,7 @@ mod tests {
     use crate::game::*;
 
     // CONFIGURATION JSONS NEED TO MATCH THE ONES IN TESTFILES FOR THESE TESTS TO WORK.
+    // Actually I think only the pieces one does.
 
     #[test]
     fn verify_piece_color_bitmaps() {
